@@ -60,7 +60,7 @@ func BenchmarkParsePackets(b *testing.B) {
 
 	b.RunParallel(func(pb *testing.PB) {
 		batcher := newBatcher(agg)
-		parser := newParser()
+		parser := newParser(newFloat64ListPool())
 		// 32 packets of 20 samples
 		rawPacket := buildPacketConent(20 * 32)
 		packet := listeners.Packet{
@@ -125,7 +125,7 @@ func BenchmarkMapperControl(b *testing.B) {
 	defer close(done)
 
 	batcher := newBatcher(agg)
-	parser := newParser()
+	parser := newParser(newFloat64ListPool())
 
 	for n := 0; n < b.N; n++ {
 		packet := listeners.Packet{
