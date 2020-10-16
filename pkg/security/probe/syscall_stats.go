@@ -225,7 +225,7 @@ func NewSyscallMonitor(manager *manager.Manager) (*SyscallMonitor, error) {
 		return nil, errors.New("map noisy_processes_bb not found")
 	}
 
-	execFrontBuffer, ok, err := manager.GetMap("exec_count_one")
+	execFrontBuffer, ok, err := manager.GetMap("exec_count_fb")
 	if err != nil {
 		return nil, err
 	}
@@ -233,7 +233,7 @@ func NewSyscallMonitor(manager *manager.Manager) (*SyscallMonitor, error) {
 		return nil, errors.New("map exec_count_one not found")
 	}
 
-	execBackBuffer, ok, err := manager.GetMap("exec_count_two")
+	execBackBuffer, ok, err := manager.GetMap("exec_count_bb")
 	if err != nil {
 		return nil, err
 	}
