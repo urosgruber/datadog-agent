@@ -34,15 +34,6 @@ var durations = []int64{
 	10 * 1e9,  // 10s
 }
 
-var errors = []int32{
-	0,
-	1,
-	2,
-	400,
-	403,
-	502,
-}
-
 var resources = []string{
 	"GET cache|xxx",
 	"events.buckets",
@@ -52,6 +43,10 @@ var resources = []string{
 }
 
 var services = []string{
+	"mysql-db",
+	"postgres-db",
+	"gorm",
+	"mux",
 	"rails",
 	"django",
 	"web-billing",
@@ -175,7 +170,7 @@ func RandomSpanDuration() int64 {
 
 // RandomSpanError generates a random span error code
 func RandomSpanError() int32 {
-	return int32RandomChoice(errors)
+	return int32RandomChoice([]int32{0, 1})
 }
 
 // RandomSpanResource generates a random span resource string
