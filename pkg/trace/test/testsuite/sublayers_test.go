@@ -25,7 +25,7 @@ func (s BySpanID) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
 func (s BySpanID) Less(i, j int) bool { return s[i].SpanID < s[j].SpanID }
 
 func TestSublayerCounts(t *testing.T) {
-	r := test.Runner{Verbose: true}
+	r := test.Runner{}
 	if err := r.Start(); err != nil {
 		t.Fatal(err)
 	}

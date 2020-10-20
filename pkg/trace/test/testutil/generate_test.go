@@ -20,7 +20,7 @@ func TestGenerateSpan(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			assert := assert.New(t)
 			now := time.Now().UnixNano()
-			s := GenerateSpan(sc)
+			s := GenerateSpan(&sc)
 			assert.NotEmpty(s.Service)
 			assert.NotEmpty(s.Name)
 			assert.NotEmpty(s.Resource)

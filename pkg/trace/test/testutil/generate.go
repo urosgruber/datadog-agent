@@ -5,8 +5,10 @@ import (
 	"time"
 
 	"github.com/DataDog/datadog-agent/pkg/trace/pb"
+	"github.com/DataDog/datadog-agent/pkg/trace/sampler"
 )
 
+// SpanConfig defines the configuration for generating spans.
 type SpanConfig struct {
 	// MinTags specifies the minimum number of tags this span should have.
 	MinTags int
@@ -14,15 +16,19 @@ type SpanConfig struct {
 	MaxTags int
 }
 
+// TraceConfig specifies trace generating configuration.
 type TraceConfig struct {
 	// MinSpans specifies the minimum number of spans per trace.
 	MinSpans int
 	// MaxSpans specifies the maximum number of spans per trace.
 	MaxSpans int
+	// Keeper reports whether this trace should be marked as sampling priority
+	// "User Keep"
+	Keeper bool
 }
 
 // GeneratePayload generates a new payload.
-func GeneratePayload(n int, tc TraceConfig, sc SpanConfig) pb.Traces {
+func GeneratePayload(n int, tc *TraceConfig, sc *SpanConfig) pb.Traces {
 	if n == 0 {
 		return pb.Traces{}
 	}
@@ -34,7 +40,13 @@ func GeneratePayload(n int, tc TraceConfig, sc SpanConfig) pb.Traces {
 }
 
 // GenerateTrace generates a valid trace using the given config.
-func GenerateTrace(tc TraceConfig, sc SpanConfig) pb.Trace {
+func GenerateTrace(tc *TraceConfig, sc *SpanConfig) pb.Trace {
+	if tc == nil {
+		tc = &TraceConfig{}
+	}
+	if sc == nil {
+		sc = &SpanConfig{}
+	}
 	if tc.MinSpans == 0 {
 		tc.MinSpans = 1
 	}
@@ -58,6 +70,9 @@ func GenerateTrace(tc TraceConfig, sc SpanConfig) pb.Trace {
 		}
 		t = append(t, s)
 	}
+	if tc.Keeper {
+		root.Metrics[sampler.KeySamplingPriority] = 2
+	}
 	for _, span := range t {
 		if span == root {
 			continue
@@ -70,7 +85,7 @@ func GenerateTrace(tc TraceConfig, sc SpanConfig) pb.Trace {
 }
 
 // GenerateSpan generates a random root span with all fields filled in.
-func GenerateSpan(c SpanConfig) *pb.Span {
+func GenerateSpan(c *SpanConfig) *pb.Span {
 	pickString := func(all []string) string { return all[rand.Intn(len(all))] }
 	id := uint64(rand.Int63())
 	duration := 1 + rand.Int63n(1_000_000_000) // between 1ns and 1s
