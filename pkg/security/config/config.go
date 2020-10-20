@@ -8,6 +8,7 @@ package config
 import (
 	aconfig "github.com/DataDog/datadog-agent/pkg/config"
 	"github.com/DataDog/datadog-agent/pkg/process/config"
+	"time"
 )
 
 // Policy represents a policy file in the configuration file
@@ -19,32 +20,36 @@ type Policy struct {
 
 // Config holds the configuration for the runtime security agent
 type Config struct {
-	Enabled             bool
-	Debug               bool
-	BPFDir              string
-	PoliciesDir         string
-	EnableKernelFilters bool
-	EnableApprovers     bool
-	EnableDiscarders    bool
-	SocketPath          string
-	SyscallMonitor      bool
-	EventServerBurst    int
-	EventServerRate     int
+	Enabled                    bool
+	Debug                      bool
+	BPFDir                     string
+	PoliciesDir                string
+	EnableKernelFilters        bool
+	EnableApprovers            bool
+	EnableDiscarders           bool
+	SocketPath                 string
+	SyscallMonitor             bool
+	EventServerBurst           int
+	EventServerRate            int
+	PerfBufferMonitor          bool
+	EventsStatsPollingInterval time.Duration
 }
 
 // NewConfig returns a new Config object
 func NewConfig(cfg *config.AgentConfig) (*Config, error) {
 	c := &Config{
-		Enabled:             aconfig.Datadog.GetBool("runtime_security_config.enabled"),
-		Debug:               aconfig.Datadog.GetBool("runtime_security_config.debug"),
-		EnableKernelFilters: aconfig.Datadog.GetBool("runtime_security_config.enable_kernel_filters"),
-		EnableApprovers:     aconfig.Datadog.GetBool("runtime_security_config.enable_approvers"),
-		EnableDiscarders:    aconfig.Datadog.GetBool("runtime_security_config.enable_discarders"),
-		SocketPath:          aconfig.Datadog.GetString("runtime_security_config.socket"),
-		SyscallMonitor:      aconfig.Datadog.GetBool("runtime_security_config.syscall_monitor.enabled"),
-		PoliciesDir:         aconfig.Datadog.GetString("runtime_security_config.policies.dir"),
-		EventServerBurst:    aconfig.Datadog.GetInt("runtime_security_config.event_server.burst"),
-		EventServerRate:     aconfig.Datadog.GetInt("runtime_security_config.event_server.rate"),
+		Enabled:                    aconfig.Datadog.GetBool("runtime_security_config.enabled"),
+		Debug:                      aconfig.Datadog.GetBool("runtime_security_config.debug"),
+		EnableKernelFilters:        aconfig.Datadog.GetBool("runtime_security_config.enable_kernel_filters"),
+		EnableApprovers:            aconfig.Datadog.GetBool("runtime_security_config.enable_approvers"),
+		EnableDiscarders:           aconfig.Datadog.GetBool("runtime_security_config.enable_discarders"),
+		SocketPath:                 aconfig.Datadog.GetString("runtime_security_config.socket"),
+		SyscallMonitor:             aconfig.Datadog.GetBool("runtime_security_config.syscall_monitor.enabled"),
+		PoliciesDir:                aconfig.Datadog.GetString("runtime_security_config.policies.dir"),
+		EventServerBurst:           aconfig.Datadog.GetInt("runtime_security_config.event_server.burst"),
+		EventServerRate:            aconfig.Datadog.GetInt("runtime_security_config.event_server.rate"),
+		PerfBufferMonitor:          aconfig.Datadog.GetBool("runtime_security_config.perf_buffer_monitor.enabled"),
+		EventsStatsPollingInterval: time.Duration(aconfig.Datadog.GetInt("runtime_security_config.events_stats.polling_interval")) * time.Second,
 	}
 
 	if cfg != nil {

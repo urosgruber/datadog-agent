@@ -52,7 +52,7 @@ func benchmarkOpen(b *testing.B, rule *rules.RuleDefinition, size int) {
 	handler := &stressEventHandler{filename: testFile}
 	test.probe.SetEventHandler(handler)
 	eventsStats := test.probe.GetEventsStats()
-	eventsStats.GetAndResetLost()
+	eventsStats.GetAndResetReadLostCount("events", -1)
 
 	b.ResetTimer()
 
@@ -74,7 +74,7 @@ func benchmarkOpen(b *testing.B, rule *rules.RuleDefinition, size int) {
 		}
 	}
 
-	lost := eventsStats.GetLost()
+	lost := eventsStats.GetReadLostCount("events", -1)
 
 	b.ReportMetric(float64(lost), "lost")
 	b.ReportMetric(float64(handler.count), "events")

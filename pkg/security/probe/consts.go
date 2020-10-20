@@ -54,8 +54,10 @@ const (
 	FileSetXAttrEventType
 	// FileRemoveXAttrEventType - Removexattr event
 	FileRemoveXAttrEventType
+	// ProcessExecEventType - Process exec event
+	ProcessExecEventType
 	// internalEventType - used internally to get the maximum number of event. Has to be the last one
-	maxEventType
+	maxEventType //nolint:deadcode,unused
 )
 
 func (t EventType) String() string {

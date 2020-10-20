@@ -150,7 +150,7 @@ func (m *Module) statsMonitor(ctx context.Context) {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	ticker := time.NewTicker(2 * time.Second)
+	ticker := time.NewTicker(m.config.EventsStatsPollingInterval)
 	defer ticker.Stop()
 
 	for {
@@ -173,14 +173,15 @@ func (m *Module) statsMonitor(ctx context.Context) {
 
 // GetStats returns statistics about the module
 func (m *Module) GetStats() map[string]interface{} {
-	probeStats, err := m.probe.GetStats()
-	if err != nil {
-		return nil
+	debug := map[string]interface{}{}
+
+	if m.probe != nil {
+		debug["probe"] = m.probe.GetDebugStats()
+	} else {
+		debug["probe"] = "not_running"
 	}
 
-	return map[string]interface{}{
-		"probe": probeStats,
-	}
+	return debug
 }
 
 // GetRuleSet returns the set of loaded rules

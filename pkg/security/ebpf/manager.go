@@ -26,7 +26,7 @@ func NewDefaultOptions() manager.Options {
 		DefaultKProbeMaxActive: 512,
 
 		// DefaultPerfRingBufferSize is the default buffer size of the perf buffers
-		DefaultPerfRingBufferSize: 128 * os.Getpagesize(),
+		DefaultPerfRingBufferSize: 2048 * os.Getpagesize(),
 
 		// DefaultProbeAttach is the default number of attach / detach retries on error
 		DefaultProbeRetry:      3,
@@ -60,5 +60,13 @@ func NewRuntimeSecurityManager() *manager.Manager {
 		Probes:   probes.AllProbes(),
 		Maps:     probes.AllMaps(),
 		PerfMaps: probes.AllPerfMaps(),
+	}
+}
+
+// GetPerfBufferStatisticsMaps returns the list of maps used to monitor the performances of each perf buffers
+func GetPerfBufferStatisticsMaps() map[string][2]string {
+	return map[string][2]string{
+		"events":             {"events_stats_one", "events_stats_two"},
+		"mountpoints_events": {"mountpoints_events_stats_one", "mountpoints_events_stats_two"},
 	}
 }

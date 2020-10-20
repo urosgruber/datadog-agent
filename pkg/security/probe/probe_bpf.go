@@ -15,6 +15,7 @@ import (
 	"github.com/DataDog/datadog-go/statsd"
 	lib "github.com/DataDog/ebpf"
 	"github.com/DataDog/ebpf/manager"
+	"github.com/pkg/errors"
 
 	"github.com/DataDog/datadog-agent/pkg/ebpf/bytecode"
 	"github.com/DataDog/datadog-agent/pkg/security/config"
@@ -61,7 +62,7 @@ type Probe struct {
 	syscallMonitor   *SyscallMonitor
 	kernelVersion    uint32
 	_                uint32 // padding for goarch=386
-	eventsStats      EventsStats
+	eventsStats      *EventsStats
 	startTime        time.Time
 	event            *Event
 	mountEvent       *Event
@@ -153,6 +154,11 @@ func (p *Probe) InitManager() error {
 		return err
 	}
 
+	p.eventsStats, err = NewEventsStats(p.manager, p.managerOptions, p.config)
+	if err != nil {
+		return errors.Wrap(err, "couldn't create events statistics monitor")
+	}
+
 	if err := p.resolvers.Init(); err != nil {
 		return err
 	}
@@ -191,67 +197,17 @@ func (p *Probe) SendStats(statsdClient *statsd.Client) error {
 			return err
 		}
 	}
-
-	if err := statsdClient.Count(MetricPrefix+".events.lost", p.eventsStats.GetAndResetLost(), nil, 1.0); err != nil {
-		return err
-	}
-
-	receivedEvents := MetricPrefix + ".events.received"
-	for i := range p.eventsStats.PerEventType {
-		if i == 0 {
-			continue
-		}
-
-		eventType := EventType(i)
-		tags := []string{fmt.Sprintf("event_type:%s", eventType.String())}
-		if value := p.eventsStats.GetAndResetEventCount(eventType); value > 0 {
-			if err := statsdClient.Count(receivedEvents, value, tags, 1.0); err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
-}
-
-// GetStats returns Stats according to the system-probe module format
-func (p *Probe) GetStats() (map[string]interface{}, error) {
-	stats := make(map[string]interface{})
-
-	var syscalls *SyscallStats
-	var err error
-
-	if p.syscallMonitor != nil {
-		syscalls, err = p.syscallMonitor.GetStats()
-	}
-
-	stats["events"] = map[string]interface{}{
-		"lost":     p.eventsStats.GetLost(),
-		"syscalls": syscalls,
-	}
-
-	perEventType := make(map[string]int64)
-	stats["per_event_type"] = perEventType
-	for i := range p.eventsStats.PerEventType {
-		if i == 0 {
-			continue
-		}
-
-		eventType := EventType(i)
-		perEventType[eventType.String()] = p.eventsStats.GetEventCount(eventType)
-	}
-
-	return stats, err
+	return p.eventsStats.SendStats(statsdClient)
 }
 
 // GetEventsStats returns statistics about the events received by the probe
-func (p *Probe) GetEventsStats() EventsStats {
+func (p *Probe) GetEventsStats() *EventsStats {
 	return p.eventsStats
 }
 
 func (p *Probe) handleLostEvents(CPU int, count uint64, perfMap *manager.PerfMap, manager *manager.Manager) {
 	log.Warnf("lost %d events\n", count)
-	p.eventsStats.CountLost(int64(count))
+	p.eventsStats.CountLostEvent(count, perfMap, CPU)
 }
 
 var eventZero Event
@@ -388,7 +344,7 @@ func (p *Probe) handleEvent(CPU int, data []byte, perfMap *manager.PerfMap, mana
 		return
 	}
 
-	p.eventsStats.CountEventType(eventType, 1)
+	p.eventsStats.CountEvent(eventType, 1, uint64(len(data)), perfMap, CPU)
 
 	log.Tracef("Dispatching event %+v\n", event)
 	p.DispatchEvent(event)
@@ -471,6 +427,14 @@ func (p *Probe) Snapshot() error {
 
 func (p *Probe) Close() error {
 	return p.manager.Stop(manager.CleanAll)
+}
+
+func (p *Probe) GetDebugStats() map[string]interface{} {
+	debug := map[string]interface{}{
+		"start_time": p.startTime.String(),
+	}
+	// TODO(Will): add manager state
+	return debug
 }
 
 // NewProbe instantiates a new runtime security agent probe
