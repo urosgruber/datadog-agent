@@ -10,6 +10,7 @@ package probe
 import (
 	"C"
 	"bytes"
+	"encoding/binary"
 	"fmt"
 	"strings"
 	"unsafe"

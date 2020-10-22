@@ -57,7 +57,7 @@ int sys_enter(struct _tracepoint_raw_syscalls_sys_enter *args) {
     }
 
     if (count) {
-        (*count)++;
+        __sync_fetch_and_add(count, 1);
     } else {
         u64 one = 1;
         count = &one;
