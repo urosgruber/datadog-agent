@@ -75,6 +75,11 @@ type AgentConfig struct {
 	StatsdHost            string
 	StatsdPort            int
 	ProcessExpVarPort     int
+	ProfilingEnabled      bool
+	ProfilingSite         string
+	ProfilingURL          string
+	ProfilingAPIKey       string
+	ProfilingEnvironment  string
 	// host type of the agent, used to populate container payload with additional host information
 	ContainerHostType model.ContainerHostType
 
@@ -493,6 +498,11 @@ func loadSysProbeEnvVariables() {
 		{"DD_DISABLE_DNS_INSPECTION", "system_probe_config.disable_dns_inspection"},
 		{"DD_COLLECT_LOCAL_DNS", "system_probe_config.collect_local_dns"},
 		{"DD_COLLECT_DNS_STATS", "system_probe_config.collect_dns_stats"},
+		{"DD_SYSTEM_PROBE_PROFILING_ENABLED", "system_probe_config.profiling.enabled"},
+		{"DD_SITE", "system_probe_config.profiling.site"},
+		{"DD_APM_PROFILING_DD_URL", "system_probe_config.profiling.profile_dd_url"},
+		{"DD_API_KEY", "system_probe_config.profiling.api_key"},
+		{"DD_ENV", "system_probe_config.profiling.env"},
 	} {
 		if v, ok := os.LookupEnv(variable.env); ok {
 			config.Datadog.Set(variable.cfg, v)
