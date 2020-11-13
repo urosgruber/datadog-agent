@@ -9,7 +9,7 @@
 struct bpf_map_def SEC("maps/open_basename_approvers") open_basename_approvers = {
     .type = BPF_MAP_TYPE_HASH,
     .key_size = BASENAME_FILTER_SIZE,
-    .value_size = sizeof(struct filter_t),
+    .value_size = sizeof(u32),
     .max_entries = 255,
     .pinning = 0,
     .namespace = "",
