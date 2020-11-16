@@ -12,9 +12,12 @@ import (
 )
 
 func TestInvalidDiscarders(t *testing.T) {
-	probe := NewProbe(nil)
+	probe, err := NewProbe(nil, nil)
+	if err != nil {
+		t.Errorf("couldn't create new probe: %v", err)
+	}
 
-	if !probe.isInvalidDiscarder("open.filename", dentryInvalidDiscarder) {
+	if !probe.IsInvalidDiscarder("open.filename", dentryInvalidDiscarder) {
 		t.Errorf("should be an invalid discarder")
 	}
 }

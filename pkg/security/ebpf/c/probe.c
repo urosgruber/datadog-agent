@@ -6,10 +6,10 @@
 #include <linux/version.h>
 
 #include "defs.h"
-#include "dentry.h"
-#include "exec.h"
 #include "process.h"
 #include "container.h"
+#include "dentry.h"
+#include "exec.h"
 #include "setattr.h"
 #include "mnt.h"
 #include "filename.h"

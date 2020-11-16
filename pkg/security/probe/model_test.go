@@ -19,10 +19,7 @@ func TestMkdirJSON(t *testing.T) {
 		t.Fatal(err)
 	}
 	e := NewEvent(&Resolvers{TimeResolver: tr})
-	e.Process = ProcessEvent{
-		Pidns:   333,
-		Comm:    "aaa",
-		TTYName: "bbb",
+	e.Process = ProcessContext{
 		Pid:     123,
 		Tid:     456,
 		UID:     8,
