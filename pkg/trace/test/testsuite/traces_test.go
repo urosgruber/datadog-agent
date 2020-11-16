@@ -29,7 +29,7 @@ func TestTraces(t *testing.T) {
 
 		p := testutil.GeneratePayload(10, &testutil.TraceConfig{
 			MinSpans: 10,
-			Keeper:   true,
+			Keep:     true,
 		}, nil)
 		if err := r.Post(p); err != nil {
 			t.Fatal(err)
@@ -50,7 +50,7 @@ func TestTraces(t *testing.T) {
 
 		p := testutil.GeneratePayload(5, &testutil.TraceConfig{
 			MinSpans: 3,
-			Keeper:   true,
+			Keep:     true,
 		}, nil)
 		for i := 0; i < 2; i++ {
 			// user reject two traces
@@ -75,7 +75,7 @@ func TestTraces(t *testing.T) {
 
 		p := testutil.GeneratePayload(5, &testutil.TraceConfig{
 			MinSpans: 5,
-			Keeper:   true,
+			Keep:     true,
 		}, nil)
 		for _, span := range p[2] {
 			span.Resource = "GET /healthcheck/11"
@@ -91,6 +91,7 @@ func TestTraces(t *testing.T) {
 
 // payloadsEqual validates that the traces in from are the same as the ones in to.
 func payloadsEqual(t *testing.T, from pb.Traces, to pb.TracePayload) {
+	//fmt.Printf("%# v\n%# v\n\n", pretty.Formatter(from), pretty.Formatter(to.Traces))
 	if want, got := len(from), len(to.Traces); want != got {
 		t.Fatalf("Expected %d traces, got %d", want, got)
 	}
@@ -103,7 +104,7 @@ func payloadsEqual(t *testing.T, from pb.Traces, to pb.TracePayload) {
 			}
 		}
 	}
-	if found != len(to.Traces) {
+	if found != len(from) {
 		t.Fatalf("Failed to match traces")
 	}
 }
@@ -119,10 +120,11 @@ func tracesEqual(from pb.Trace, to *pb.APITrace) bool {
 		for _, s2 := range to.Spans {
 			if spansEqual(s1, s2) {
 				found++
+				break
 			}
 		}
 	}
-	return found != len(from)
+	return found == len(from)
 }
 
 // spansEqual reports whether s1 and s2 are equal spans. s2 is permitted to have
@@ -130,7 +132,8 @@ func tracesEqual(from pb.Trace, to *pb.APITrace) bool {
 func spansEqual(s1, s2 *pb.Span) bool {
 	if s1.Name != s2.Name ||
 		s1.Service != s2.Service ||
-		s1.Resource != s2.Resource ||
+		//obfuscated
+		//s1.Resource != s2.Resource ||
 		s1.TraceID != s2.TraceID ||
 		s1.SpanID != s2.SpanID ||
 		s1.ParentID != s2.ParentID ||

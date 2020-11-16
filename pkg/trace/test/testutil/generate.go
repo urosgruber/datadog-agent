@@ -22,9 +22,9 @@ type TraceConfig struct {
 	MinSpans int
 	// MaxSpans specifies the maximum number of spans per trace.
 	MaxSpans int
-	// Keeper reports whether this trace should be marked as sampling priority
+	// Keep reports whether this trace should be marked as sampling priority
 	// "User Keep"
-	Keeper bool
+	Keep bool
 }
 
 // GeneratePayload generates a new payload.
@@ -70,7 +70,7 @@ func GenerateTrace(tc *TraceConfig, sc *SpanConfig) pb.Trace {
 		}
 		t = append(t, s)
 	}
-	if tc.Keeper {
+	if tc.Keep {
 		root.Metrics[sampler.KeySamplingPriority] = 2
 	}
 	for _, span := range t {
